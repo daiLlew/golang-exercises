@@ -1,26 +1,26 @@
-package chat
+package main
 
 import (
+	"github.com/daiLlew/golang-exercises/trace"
 	"log"
 	"net/http"
 )
 
 type room struct {
 	forward chan []byte
-
-	join chan *client
-
-	leave chan *client
-
+	join    chan *client
+	leave   chan *client
 	clients map[*client]bool
+	tracer  trace.Tracer
 }
 
-func NewRoom() *room {
+func newRoom() *room {
 	return &room{
 		forward: make(chan []byte),
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
+		tracer:  trace.Off(),
 	}
 }
 
@@ -30,15 +30,20 @@ func (r *room) Run() {
 		case client := <-r.join:
 			// joining.
 			r.clients[client] = true
+			r.tracer.Trace("New client joined.")
 		case client := <-r.leave:
 			// leaving
 			delete(r.clients, client)
 			close(client.send)
+			r.tracer.Trace("Client left.")
 		case msg := <-r.forward:
 			// forward
+			r.tracer.Trace("Message recieved: " + string(msg))
 			for client := range r.clients {
 				client.send <- msg
+				r.tracer.Trace("---- Message sent to client.")
 			}
+
 		}
 	}
 }

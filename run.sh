@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-go build -o golang-exercises
-./golang-exercises
+cd chat
+go build -o chat
+./chat -addr=":3000"
