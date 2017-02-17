@@ -2,10 +2,18 @@ package main
 
 import (
 	"github.com/daiLlew/golang-exercises/trace"
+	"github.com/gorilla/websocket"
 	"github.com/stretchr/objx"
 	"log"
 	"net/http"
 )
+
+const (
+	socketBufferSize  = 1024
+	messageBufferSize = 256
+)
+
+var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize, WriteBufferSize: messageBufferSize}
 
 type room struct {
 	forward chan *message
@@ -66,7 +74,6 @@ func (r *room) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		send:     make(chan *message, messageBufferSize),
 		room:     r,
 		userData: objx.MustFromBase64(authCookie.Value),
-
 	}
 	r.join <- client
 	defer func() {

@@ -5,13 +5,6 @@ import (
 	"time"
 )
 
-const (
-	socketBufferSize  = 1024
-	messageBufferSize = 256
-)
-
-var upgrader = &websocket.Upgrader{ReadBufferSize: socketBufferSize, WriteBufferSize: messageBufferSize}
-
 // Client representing a single user.
 type client struct {
 	socket   *websocket.Conn
@@ -32,6 +25,9 @@ func (c *client) read() {
 		msg.When = time.Now()
 		msg.WhenStr = msg.When.Format("15:04")
 		msg.Name = c.userData["name"].(string)
+		if avatarURL, ok := c.userData["avatar_url"]; ok {
+			msg.AvatarURL = avatarURL.(string)
+		}
 		c.room.forward <- msg
 	}
 }
