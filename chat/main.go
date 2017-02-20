@@ -15,6 +15,12 @@ import (
 	"text/template"
 )
 
+var avatars Avatar = TryAvatars{
+	UserFileSystemAvatar,
+	UseAuthAvatar,
+	UseGravatarAvatar,
+}
+
 const (
 	githubRedirectURL = "http://localhost:8080/auth/callback/github"
 )
@@ -66,6 +72,9 @@ func main() {
 		w.Header().Set("Location", "/chat")
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	})
+	http.Handle("/upload", &templateHandler{filename: "upload.html"})
+	http.HandleFunc("/uploader", uploadHandler)
+	http.Handle("/avatars/", http.StripPrefix("/avatars/", http.FileServer(http.Dir("./avatars"))))
 
 	go r.Run()
 	// start the web server.
